@@ -1,0 +1,8 @@
+{
+  "mainnet": {
+    "IndieBrokerV1": {
+      "address": "0x72A78d4Da171fbF382aF0C3Dae94949e1459852f",
+      "startBlock": 16533931
+    }
+  }
+}

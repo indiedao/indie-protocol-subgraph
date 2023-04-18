@@ -1,0 +1,170 @@
+# START: Custom GraphQL schema
+
+type PaymentStats @entity {
+  id: ID!
+  totalAmountSum: BigInt! # uint256
+  payeeAmountSum: BigInt! # uint256
+  treasuryAmountSum: BigInt! # uint256
+  leadAmountSum: BigInt! # uint256
+  salesAmountSum: BigInt! # uint256
+  cashVestingAmountSum: BigInt! # uint256
+}
+
+# END: Custom GraphQL schema
+
+# START: Auto-generated GraphQL schema
+
+type CompleteProjectSprint @entity(immutable: true) {
+  id: Bytes!
+  projectId: BigInt! # uint256
+  sprintId: BigInt! # uint256
+  totalAmount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type DistributePayment @entity(immutable: true) {
+  id: Bytes!
+  payee: Bytes! # address
+  projectId: BigInt! # uint256
+  totalAmount: BigInt! # uint256
+  payeeAmount: BigInt! # uint256
+  treasuryAmount: BigInt! # uint256
+  leadAmount: BigInt! # uint256
+  salesAmount: BigInt! # uint256
+  cashVestingAmount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OwnershipTransferred @entity(immutable: true) {
+  id: Bytes!
+  previousOwner: Bytes! # address
+  newOwner: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Paused @entity(immutable: true) {
+  id: Bytes!
+  account: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ReassignProjectClient @entity(immutable: true) {
+  id: Bytes!
+  projectId: BigInt! # uint256
+  newClientAddress: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ReassignProjectLead @entity(immutable: true) {
+  id: Bytes!
+  projectId: BigInt! # uint256
+  newLeadAddress: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ReassignProjectSales @entity(immutable: true) {
+  id: Bytes!
+  projectId: BigInt! # uint256
+  newSalesAddress: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type SendDeposit @entity(immutable: true) {
+  id: Bytes!
+  projectId: BigInt! # uint256
+  sender: Bytes! # address
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type SetAllowedLead @entity(immutable: true) {
+  id: Bytes!
+  addr: Bytes! # address
+  allowed: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type SetFee @entity(immutable: true) {
+  id: Bytes!
+  f: Int! # uint8
+  fee: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type SetFeeRecipient @entity(immutable: true) {
+  id: Bytes!
+  f: Int! # uint8
+  recipient: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type SetIndividualTreasuryFee @entity(immutable: true) {
+  id: Bytes!
+  addr: Bytes! # address
+  fee: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type SetMinMaxIndividualTreasuryFees @entity(immutable: true) {
+  id: Bytes!
+  minFee: BigInt! # uint256
+  maxFee: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type StartProject @entity(immutable: true) {
+  id: Bytes!
+  projectId: BigInt! # uint256
+  leadAddress: Bytes! # address
+  clientAddress: Bytes! # address
+  salesAddress: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Unpaused @entity(immutable: true) {
+  id: Bytes!
+  account: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type WithdrawFromProject @entity(immutable: true) {
+  id: Bytes!
+  projectId: BigInt! # uint256
+  amount: BigInt! # uint256
+  recipient: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+# END: Auto-generated GraphQL schema
