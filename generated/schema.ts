@@ -11,7 +11,7 @@ import {
   BigDecimal
 } from "@graphprotocol/graph-ts";
 
-export class PaymentStats extends Entity {
+export class PaymentSummary extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -19,18 +19,18 @@ export class PaymentStats extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id != null, "Cannot save PaymentStats entity without an ID");
+    assert(id != null, "Cannot save PaymentSummary entity without an ID");
     if (id) {
       assert(
         id.kind == ValueKind.STRING,
-        `Entities of type PaymentStats must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
+        `Entities of type PaymentSummary must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
       );
-      store.set("PaymentStats", id.toString(), this);
+      store.set("PaymentSummary", id.toString(), this);
     }
   }
 
-  static load(id: string): PaymentStats | null {
-    return changetype<PaymentStats | null>(store.get("PaymentStats", id));
+  static load(id: string): PaymentSummary | null {
+    return changetype<PaymentSummary | null>(store.get("PaymentSummary", id));
   }
 
   get id(): string {
@@ -94,6 +94,65 @@ export class PaymentStats extends Entity {
 
   set cashVestingAmountSum(value: BigInt) {
     this.set("cashVestingAmountSum", Value.fromBigInt(value));
+  }
+}
+
+export class Quarter extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save Quarter entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        `Entities of type Quarter must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set("Quarter", id.toString(), this);
+    }
+  }
+
+  static load(id: string): Quarter | null {
+    return changetype<Quarter | null>(store.get("Quarter", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get quarter(): i32 {
+    let value = this.get("quarter");
+    return value!.toI32();
+  }
+
+  set quarter(value: i32) {
+    this.set("quarter", Value.fromI32(value));
+  }
+
+  get year(): i32 {
+    let value = this.get("year");
+    return value!.toI32();
+  }
+
+  set year(value: i32) {
+    this.set("year", Value.fromI32(value));
+  }
+
+  get paymentSummary(): string {
+    let value = this.get("paymentSummary");
+    return value!.toString();
+  }
+
+  set paymentSummary(value: string) {
+    this.set("paymentSummary", Value.fromString(value));
   }
 }
 
