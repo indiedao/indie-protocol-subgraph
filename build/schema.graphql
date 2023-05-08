@@ -14,7 +14,7 @@ type Quarter @entity {
   id: ID!
   quarter: Int! # uint8
   year: Int! # uint16
-  paymentSummary: PaymentSummary!
+  paymentSummary: PaymentSummary
 }
 
 # END: Custom GraphQL schema

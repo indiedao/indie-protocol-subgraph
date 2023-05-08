@@ -1,4 +1,4 @@
-import { BigInt } from '@graphprotocol/graph-ts'
+import { BigInt, log } from '@graphprotocol/graph-ts'
 import {
   CompleteProjectSprint as CompleteProjectSprintEvent,
   DistributePayment as DistributePaymentEvent,
@@ -75,7 +75,9 @@ export function handleDistributePayment(event: DistributePaymentEvent): void {
   _updatePaymentSummary("allTime", entity)
 
   const quarter = _findOrCreateQuarterFromTimestamp(event.block.timestamp)
-  _updatePaymentSummary(quarter.id, entity)
+  const paymentSummary = _updatePaymentSummary(quarter.id, entity)
+  quarter.paymentSummary = paymentSummary.id
+  quarter.save()
 
   entity.save()
 }
@@ -309,6 +311,7 @@ function _findOrCreatePaymentSummary(
 }
 
 function _findOrCreateQuarter(year: i32, quarter: i32): Quarter {
+  // log.info('_findOrCreateQuarter | year: {}; quarter: {}', [year.toString(), quarter.toString()])
   const quarterId = `${year}_${quarter}`
   let entity = Quarter.load(quarterId)
   if (entity == null) {
@@ -320,6 +323,7 @@ function _findOrCreateQuarter(year: i32, quarter: i32): Quarter {
 }
 
 function _findOrCreateQuarterFromTimestamp(timestamp: BigInt): Quarter {
+  // log.info('_findOrCreateQuarterFromTimestamp | timestamp: {}', [timestamp.toString()])
   const timestampAsNumber = timestamp.toI64()
   const timestampInSeconds = timestampAsNumber * 1000
   const timestampAsDate = new Date(timestampInSeconds)
@@ -331,6 +335,7 @@ function _findOrCreateQuarterFromTimestamp(timestamp: BigInt): Quarter {
 }
 
 function _getQuarterFromMonth (month: i32): i32 {
+  // log.info('_getQuarterFromMonth | month: {}', [month.toString()])
   if (month <= 2) {
     return 1
   } else if (month <= 5) {
@@ -342,7 +347,7 @@ function _getQuarterFromMonth (month: i32): i32 {
   }
 }
 
-function _updatePaymentSummary(id: string, payment: DistributePayment): void {
+function _updatePaymentSummary(id: string, payment: DistributePayment): PaymentSummary {
   const summary = _findOrCreatePaymentSummary(id)
   summary.totalAmountSum = summary.totalAmountSum.plus(
     payment.totalAmount
@@ -363,4 +368,6 @@ function _updatePaymentSummary(id: string, payment: DistributePayment): void {
     payment.cashVestingAmount
   )
   summary.save()
+
+  return summary
 }
