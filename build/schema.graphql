@@ -1,6 +1,6 @@
 # START: Custom GraphQL schema
 
-type PaymentStats @entity {
+type PaymentSummary @entity {
   id: ID!
   totalAmountSum: BigInt! # uint256
   payeeAmountSum: BigInt! # uint256
@@ -8,6 +8,13 @@ type PaymentStats @entity {
   leadAmountSum: BigInt! # uint256
   salesAmountSum: BigInt! # uint256
   cashVestingAmountSum: BigInt! # uint256
+}
+
+type Quarter @entity {
+  id: ID!
+  quarter: Int! # uint8
+  year: Int! # uint16
+  paymentSummary: PaymentSummary
 }
 
 # END: Custom GraphQL schema

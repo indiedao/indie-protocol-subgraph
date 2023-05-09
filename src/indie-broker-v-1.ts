@@ -1,4 +1,4 @@
-import { BigInt } from '@graphprotocol/graph-ts'
+import { BigInt, log } from '@graphprotocol/graph-ts'
 import {
   CompleteProjectSprint as CompleteProjectSprintEvent,
   DistributePayment as DistributePaymentEvent,
@@ -22,7 +22,8 @@ import {
   DistributePayment,
   OwnershipTransferred,
   Paused,
-  PaymentStats,
+  PaymentSummary,
+  Quarter,
   ReassignProjectClient,
   ReassignProjectLead,
   ReassignProjectSales,
@@ -71,27 +72,12 @@ export function handleDistributePayment(event: DistributePaymentEvent): void {
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
 
-  const allTimePaymentStats = _findOrCreatePaymentStats("allTime")
-  allTimePaymentStats.totalAmountSum = allTimePaymentStats.totalAmountSum.plus(
-    entity.totalAmount
-  )
-  allTimePaymentStats.payeeAmountSum = allTimePaymentStats.payeeAmountSum.plus(
-    entity.payeeAmount
-  )
-  allTimePaymentStats.treasuryAmountSum = allTimePaymentStats.treasuryAmountSum.plus(
-    entity.treasuryAmount
-  )
-  allTimePaymentStats.leadAmountSum = allTimePaymentStats.leadAmountSum.plus(
-    entity.leadAmount
-  )
-  allTimePaymentStats.salesAmountSum = allTimePaymentStats.salesAmountSum.plus(
-    entity.salesAmount
-  )
-  allTimePaymentStats.cashVestingAmountSum = allTimePaymentStats.cashVestingAmountSum.plus(
-    entity.cashVestingAmount
-  )
-  allTimePaymentStats.save()
+  _updatePaymentSummary("allTime", entity)
 
+  const quarter = _findOrCreateQuarterFromTimestamp(event.block.timestamp)
+  const paymentSummary = _updatePaymentSummary(quarter.id, entity)
+  quarter.paymentSummary = paymentSummary.id
+  quarter.save()
 
   entity.save()
 }
@@ -308,12 +294,12 @@ export function handleWithdrawFromProject(
   entity.save()
 }
 
-function _findOrCreatePaymentStats(
+function _findOrCreatePaymentSummary(
   id: string
-): PaymentStats {
-  let entity = PaymentStats.load(id)
+): PaymentSummary {
+  let entity = PaymentSummary.load(id)
   if (entity == null) {
-    entity = new PaymentStats(id)
+    entity = new PaymentSummary(id)
     entity.totalAmountSum = BigInt.zero()
     entity.payeeAmountSum = BigInt.zero()
     entity.treasuryAmountSum = BigInt.zero()
@@ -322,4 +308,66 @@ function _findOrCreatePaymentStats(
     entity.cashVestingAmountSum = BigInt.zero() 
   }
   return entity
+}
+
+function _findOrCreateQuarter(year: i32, quarter: i32): Quarter {
+  // log.info('_findOrCreateQuarter | year: {}; quarter: {}', [year.toString(), quarter.toString()])
+  const quarterId = `${year}_${quarter}`
+  let entity = Quarter.load(quarterId)
+  if (entity == null) {
+    entity = new Quarter(quarterId)
+    entity.quarter = quarter
+    entity.year = year
+  }
+  return entity
+}
+
+function _findOrCreateQuarterFromTimestamp(timestamp: BigInt): Quarter {
+  // log.info('_findOrCreateQuarterFromTimestamp | timestamp: {}', [timestamp.toString()])
+  const timestampAsNumber = timestamp.toI64()
+  const timestampInSeconds = timestampAsNumber * 1000
+  const timestampAsDate = new Date(timestampInSeconds)
+  const year = timestampAsDate.getUTCFullYear()
+  const month = timestampAsDate.getUTCMonth()
+  const quarter = _getQuarterFromMonth(month)
+
+  return _findOrCreateQuarter(year, quarter)
+}
+
+function _getQuarterFromMonth (month: i32): i32 {
+  // log.info('_getQuarterFromMonth | month: {}', [month.toString()])
+  if (month <= 2) {
+    return 1
+  } else if (month <= 5) {
+    return 2
+  } else if (month <= 8) {
+    return 3
+  } else {
+    return 4
+  }
+}
+
+function _updatePaymentSummary(id: string, payment: DistributePayment): PaymentSummary {
+  const summary = _findOrCreatePaymentSummary(id)
+  summary.totalAmountSum = summary.totalAmountSum.plus(
+    payment.totalAmount
+  )
+  summary.payeeAmountSum = summary.payeeAmountSum.plus(
+    payment.payeeAmount
+  )
+  summary.treasuryAmountSum = summary.treasuryAmountSum.plus(
+    payment.treasuryAmount
+  )
+  summary.leadAmountSum = summary.leadAmountSum.plus(
+    payment.leadAmount
+  )
+  summary.salesAmountSum = summary.salesAmountSum.plus(
+    payment.salesAmount
+  )
+  summary.cashVestingAmountSum = summary.cashVestingAmountSum.plus(
+    payment.cashVestingAmount
+  )
+  summary.save()
+
+  return summary
 }
