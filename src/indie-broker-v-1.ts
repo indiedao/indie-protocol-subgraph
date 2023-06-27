@@ -325,8 +325,8 @@ function _findOrCreateQuarter(year: i32, quarter: i32): Quarter {
 function _findOrCreateQuarterFromTimestamp(timestamp: BigInt): Quarter {
   // log.info('_findOrCreateQuarterFromTimestamp | timestamp: {}', [timestamp.toString()])
   const timestampAsNumber = timestamp.toI64()
-  const timestampInSeconds = timestampAsNumber * 1000
-  const timestampAsDate = new Date(timestampInSeconds)
+  const timestampInMilliseconds = timestampAsNumber * 1000
+  const timestampAsDate = new Date(timestampInMilliseconds)
   const year = timestampAsDate.getUTCFullYear()
   const month = timestampAsDate.getUTCMonth()
   const quarter = _getQuarterFromMonth(month)
