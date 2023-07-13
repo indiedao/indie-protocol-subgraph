@@ -51,6 +51,15 @@ export class PaymentSummary extends Entity {
     this.set("totalAmountSum", Value.fromBigInt(value));
   }
 
+  get totalAmountSumUsd(): string {
+    let value = this.get("totalAmountSumUsd");
+    return value!.toString();
+  }
+
+  set totalAmountSumUsd(value: string) {
+    this.set("totalAmountSumUsd", Value.fromString(value));
+  }
+
   get payeeAmountSum(): BigInt {
     let value = this.get("payeeAmountSum");
     return value!.toBigInt();
@@ -58,6 +67,15 @@ export class PaymentSummary extends Entity {
 
   set payeeAmountSum(value: BigInt) {
     this.set("payeeAmountSum", Value.fromBigInt(value));
+  }
+
+  get payeeAmountSumUsd(): string {
+    let value = this.get("payeeAmountSumUsd");
+    return value!.toString();
+  }
+
+  set payeeAmountSumUsd(value: string) {
+    this.set("payeeAmountSumUsd", Value.fromString(value));
   }
 
   get treasuryAmountSum(): BigInt {
@@ -69,6 +87,15 @@ export class PaymentSummary extends Entity {
     this.set("treasuryAmountSum", Value.fromBigInt(value));
   }
 
+  get treasuryAmountSumUsd(): string {
+    let value = this.get("treasuryAmountSumUsd");
+    return value!.toString();
+  }
+
+  set treasuryAmountSumUsd(value: string) {
+    this.set("treasuryAmountSumUsd", Value.fromString(value));
+  }
+
   get leadAmountSum(): BigInt {
     let value = this.get("leadAmountSum");
     return value!.toBigInt();
@@ -76,6 +103,15 @@ export class PaymentSummary extends Entity {
 
   set leadAmountSum(value: BigInt) {
     this.set("leadAmountSum", Value.fromBigInt(value));
+  }
+
+  get leadAmountSumUsd(): string {
+    let value = this.get("leadAmountSumUsd");
+    return value!.toString();
+  }
+
+  set leadAmountSumUsd(value: string) {
+    this.set("leadAmountSumUsd", Value.fromString(value));
   }
 
   get salesAmountSum(): BigInt {
@@ -87,6 +123,15 @@ export class PaymentSummary extends Entity {
     this.set("salesAmountSum", Value.fromBigInt(value));
   }
 
+  get salesAmountSumUsd(): string {
+    let value = this.get("salesAmountSumUsd");
+    return value!.toString();
+  }
+
+  set salesAmountSumUsd(value: string) {
+    this.set("salesAmountSumUsd", Value.fromString(value));
+  }
+
   get cashVestingAmountSum(): BigInt {
     let value = this.get("cashVestingAmountSum");
     return value!.toBigInt();
@@ -94,6 +139,15 @@ export class PaymentSummary extends Entity {
 
   set cashVestingAmountSum(value: BigInt) {
     this.set("cashVestingAmountSum", Value.fromBigInt(value));
+  }
+
+  get cashVestingAmountSumUsd(): string {
+    let value = this.get("cashVestingAmountSumUsd");
+    return value!.toString();
+  }
+
+  set cashVestingAmountSumUsd(value: string) {
+    this.set("cashVestingAmountSumUsd", Value.fromString(value));
   }
 }
 
@@ -146,13 +200,115 @@ export class Quarter extends Entity {
     this.set("year", Value.fromI32(value));
   }
 
-  get paymentSummary(): string {
+  get paymentSummary(): string | null {
     let value = this.get("paymentSummary");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  set paymentSummary(value: string | null) {
+    if (!value) {
+      this.unset("paymentSummary");
+    } else {
+      this.set("paymentSummary", Value.fromString(<string>value));
+    }
+  }
+}
+
+export class Week extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save Week entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        `Entities of type Week must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set("Week", id.toString(), this);
+    }
+  }
+
+  static load(id: string): Week | null {
+    return changetype<Week | null>(store.get("Week", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
     return value!.toString();
   }
 
-  set paymentSummary(value: string) {
-    this.set("paymentSummary", Value.fromString(value));
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get week(): i32 {
+    let value = this.get("week");
+    return value!.toI32();
+  }
+
+  set week(value: i32) {
+    this.set("week", Value.fromI32(value));
+  }
+
+  get year(): i32 {
+    let value = this.get("year");
+    return value!.toI32();
+  }
+
+  set year(value: i32) {
+    this.set("year", Value.fromI32(value));
+  }
+
+  get quarter(): string {
+    let value = this.get("quarter");
+    return value!.toString();
+  }
+
+  set quarter(value: string) {
+    this.set("quarter", Value.fromString(value));
+  }
+
+  get startDate(): string {
+    let value = this.get("startDate");
+    return value!.toString();
+  }
+
+  set startDate(value: string) {
+    this.set("startDate", Value.fromString(value));
+  }
+
+  get endDate(): string {
+    let value = this.get("endDate");
+    return value!.toString();
+  }
+
+  set endDate(value: string) {
+    this.set("endDate", Value.fromString(value));
+  }
+
+  get paymentSummary(): string | null {
+    let value = this.get("paymentSummary");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  set paymentSummary(value: string | null) {
+    if (!value) {
+      this.unset("paymentSummary");
+    } else {
+      this.set("paymentSummary", Value.fromString(<string>value));
+    }
   }
 }
 

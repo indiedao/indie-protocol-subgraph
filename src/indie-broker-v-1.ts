@@ -35,8 +35,11 @@ import {
   SetMinMaxIndividualTreasuryFees,
   StartProject,
   Unpaused,
+  Week,
   WithdrawFromProject
 } from "../generated/schema"
+import { firstDayOfWeek, formatDate, getWeekOfYear, lastDayOfWeek } from './dates'
+import { usdcToUsd } from './currency'
 
 export function handleCompleteProjectSprint(
   event: CompleteProjectSprintEvent
@@ -72,12 +75,20 @@ export function handleDistributePayment(event: DistributePaymentEvent): void {
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
 
+  // Update all-time summary
   _updatePaymentSummary("allTime", entity)
 
+  // Update quarter summary
   const quarter = _findOrCreateQuarterFromTimestamp(event.block.timestamp)
-  const paymentSummary = _updatePaymentSummary(quarter.id, entity)
-  quarter.paymentSummary = paymentSummary.id
+  const quarterPaymentSummary = _updatePaymentSummary(quarter.id, entity)
+  quarter.paymentSummary = quarterPaymentSummary.id
   quarter.save()
+
+  // Update week summary
+  const week = _findOrCreateWeekFromTimestamp(event.block.timestamp, quarter)
+  const weekPaymentSummary = _updatePaymentSummary(week.id, entity)
+  week.paymentSummary = weekPaymentSummary.id
+  week.save()
 
   entity.save()
 }
@@ -347,26 +358,63 @@ function _getQuarterFromMonth (month: i32): i32 {
   }
 }
 
+function _findOrCreateWeekFromTimestamp(timestamp: BigInt, quarter: Quarter): Week {
+  log.info('_findOrCreateWeekFromTimestamp | timestamp: {}', [timestamp.toString()])
+  const timestampAsNumber = timestamp.toI64()
+  const timestampInMilliseconds = timestampAsNumber * 1000
+  const timestampAsDate = new Date(timestampInMilliseconds)
+  const year = timestampAsDate.getUTCFullYear()
+  const week = getWeekOfYear(timestampAsDate)
+
+  const weekId = `${year}_${week}`
+  let entity = Week.load(weekId)
+  if (entity == null) {
+    const startDate = firstDayOfWeek(timestampAsDate)
+    const endDate = lastDayOfWeek(timestampAsDate)
+    entity = new Week(weekId)
+    entity.week = week
+    entity.year = year
+    entity.startDate = formatDate(startDate)
+    entity.endDate = formatDate(endDate)
+    entity.quarter = quarter.id
+  }
+  return entity
+
+}
+
 function _updatePaymentSummary(id: string, payment: DistributePayment): PaymentSummary {
+  log.info('_updatePaymentSummary | id: {}', [id.toString()])
   const summary = _findOrCreatePaymentSummary(id)
   summary.totalAmountSum = summary.totalAmountSum.plus(
     payment.totalAmount
   )
+  summary.totalAmountSumUsd = usdcToUsd(summary.totalAmountSum)
+
   summary.payeeAmountSum = summary.payeeAmountSum.plus(
     payment.payeeAmount
   )
+  summary.payeeAmountSumUsd = usdcToUsd(summary.payeeAmountSum)
+
   summary.treasuryAmountSum = summary.treasuryAmountSum.plus(
     payment.treasuryAmount
   )
+  summary.treasuryAmountSumUsd = usdcToUsd(summary.treasuryAmountSum)
+
   summary.leadAmountSum = summary.leadAmountSum.plus(
     payment.leadAmount
   )
+  summary.leadAmountSumUsd = usdcToUsd(summary.leadAmountSum)
+
   summary.salesAmountSum = summary.salesAmountSum.plus(
     payment.salesAmount
   )
+  summary.salesAmountSumUsd = usdcToUsd(summary.salesAmountSum)
+
   summary.cashVestingAmountSum = summary.cashVestingAmountSum.plus(
     payment.cashVestingAmount
   )
+  summary.cashVestingAmountSumUsd = usdcToUsd(summary.cashVestingAmountSum)
+
   summary.save()
 
   return summary
