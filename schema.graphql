@@ -2,21 +2,42 @@
 
 type PaymentSummary @entity {
   id: ID!
+
   totalAmountSum: BigInt! # uint256
+  totalAmountSumUsd: String!
+
   payeeAmountSum: BigInt! # uint256
+  payeeAmountSumUsd: String!
+
   treasuryAmountSum: BigInt! # uint256
+  treasuryAmountSumUsd: String!
+
   leadAmountSum: BigInt! # uint256
+  leadAmountSumUsd: String!
+
   salesAmountSum: BigInt! # uint256
+  salesAmountSumUsd: String!
+
   cashVestingAmountSum: BigInt! # uint256
+  cashVestingAmountSumUsd: String!
 }
 
 type Quarter @entity {
-  id: ID!
+  id: ID! # {year}_{quarter}
   quarter: Int! # uint8
   year: Int! # uint16
   paymentSummary: PaymentSummary
 }
 
+type Week @entity {
+  id: ID!
+  week: Int! # uint8
+  year: Int! # uint16
+  quarter: Quarter!
+  startDate: String! # MM/dd/yyyy
+  endDate: String! # MM/dd/yyyy
+  paymentSummary: PaymentSummary
+}
 # END: Custom GraphQL schema
 
 # START: Auto-generated GraphQL schema
