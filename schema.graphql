@@ -20,6 +20,33 @@ type PaymentSummary @entity {
 
   cashVestingAmountSum: BigInt! # uint256
   cashVestingAmountSumUsd: String!
+
+  addressPaymentSummaries: [AddressPaymentSummary!]!
+}
+
+type AddressPaymentSummary @entity {
+  id: ID!
+  address: String!
+
+  totalAmountSum: BigInt! # uint256
+  totalAmountSumUsd: String!
+
+  payeeAmountSum: BigInt! # uint256
+  payeeAmountSumUsd: String!
+
+  leadAmountSum: BigInt! # uint256
+  leadAmountSumUsd: String!
+
+  salesAmountSum: BigInt! # uint256
+  salesAmountSumUsd: String!
+
+  cashVestingAmountSum: BigInt! # uint256
+  cashVestingAmountSumUsd: String!
+
+  takeHomeAmountSum: BigInt! # uint256
+  takeHomeAmountSumUsd: String!
+
+  paymentSummary: PaymentSummary!
 }
 
 type Quarter @entity {

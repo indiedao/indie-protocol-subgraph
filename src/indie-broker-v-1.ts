@@ -2,6 +2,7 @@ import { BigInt, log } from '@graphprotocol/graph-ts'
 import {
   CompleteProjectSprint as CompleteProjectSprintEvent,
   DistributePayment as DistributePaymentEvent,
+  IndieBrokerV1,
   OwnershipTransferred as OwnershipTransferredEvent,
   Paused as PausedEvent,
   ReassignProjectClient as ReassignProjectClientEvent,
@@ -18,6 +19,7 @@ import {
   WithdrawFromProject as WithdrawFromProjectEvent
 } from "../generated/IndieBrokerV1/IndieBrokerV1"
 import {
+  AddressPaymentSummary,
   CompleteProjectSprint,
   DistributePayment,
   OwnershipTransferred,
@@ -40,6 +42,7 @@ import {
 } from "../generated/schema"
 import { firstDayOfWeek, formatDate, getWeekOfYear, lastDayOfWeek } from './dates'
 import { usdcToUsd } from './currency'
+import { IndieBrokerV1Context } from './IndieBrokerV1Context'
 
 export function handleCompleteProjectSprint(
   event: CompleteProjectSprintEvent
@@ -75,18 +78,20 @@ export function handleDistributePayment(event: DistributePaymentEvent): void {
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
 
+  const context = new IndieBrokerV1Context(event.address)
+
   // Update all-time summary
-  _updatePaymentSummary("allTime", entity)
+  _updatePaymentSummary(context, "allTime", entity)
 
   // Update quarter summary
   const quarter = _findOrCreateQuarterFromTimestamp(event.block.timestamp)
-  const quarterPaymentSummary = _updatePaymentSummary(quarter.id, entity)
+  const quarterPaymentSummary = _updatePaymentSummary(context, quarter.id, entity)
   quarter.paymentSummary = quarterPaymentSummary.id
   quarter.save()
 
   // Update week summary
   const week = _findOrCreateWeekFromTimestamp(event.block.timestamp, quarter)
-  const weekPaymentSummary = _updatePaymentSummary(week.id, entity)
+  const weekPaymentSummary = _updatePaymentSummary(context, week.id, entity)
   week.paymentSummary = weekPaymentSummary.id
   week.save()
 
@@ -312,11 +317,41 @@ function _findOrCreatePaymentSummary(
   if (entity == null) {
     entity = new PaymentSummary(id)
     entity.totalAmountSum = BigInt.zero()
+    entity.totalAmountSumUsd = "0.00"
     entity.payeeAmountSum = BigInt.zero()
+    entity.payeeAmountSumUsd = "0.00"
     entity.treasuryAmountSum = BigInt.zero()
+    entity.treasuryAmountSumUsd = "0.00"
     entity.leadAmountSum = BigInt.zero()
+    entity.leadAmountSumUsd = "0.00"
     entity.salesAmountSum = BigInt.zero()
+    entity.salesAmountSumUsd = "0.00"
     entity.cashVestingAmountSum = BigInt.zero() 
+    entity.cashVestingAmountSumUsd = "0.00"
+    entity.addressPaymentSummaries = []
+  }
+  return entity
+}
+
+function _findOrCreateAddressPaymentSummary(address: string, paymentSummaryId: string): AddressPaymentSummary {
+  let id = `${paymentSummaryId}_${address}`
+  let entity = AddressPaymentSummary.load(id)
+  if (entity == null) {
+    entity = new AddressPaymentSummary(id)
+    entity.address = address
+    entity.paymentSummary = paymentSummaryId
+    entity.totalAmountSum = BigInt.zero()
+    entity.totalAmountSumUsd = "0.00"
+    entity.payeeAmountSum = BigInt.zero()
+    entity.payeeAmountSumUsd = "0.00"
+    entity.leadAmountSum = BigInt.zero()
+    entity.leadAmountSumUsd = "0.00"
+    entity.salesAmountSum = BigInt.zero()
+    entity.salesAmountSumUsd = "0.00"
+    entity.cashVestingAmountSum = BigInt.zero()
+    entity.cashVestingAmountSumUsd = "0.00"
+    entity.takeHomeAmountSum = BigInt.zero()
+    entity.takeHomeAmountSumUsd = "0.00"
   }
   return entity
 }
@@ -382,8 +417,9 @@ function _findOrCreateWeekFromTimestamp(timestamp: BigInt, quarter: Quarter): We
 
 }
 
-function _updatePaymentSummary(id: string, payment: DistributePayment): PaymentSummary {
+function _updatePaymentSummary(context: IndieBrokerV1Context, id: string, payment: DistributePayment): PaymentSummary {
   log.info('_updatePaymentSummary | id: {}', [id.toString()])
+
   const summary = _findOrCreatePaymentSummary(id)
   summary.totalAmountSum = summary.totalAmountSum.plus(
     payment.totalAmount
@@ -414,6 +450,44 @@ function _updatePaymentSummary(id: string, payment: DistributePayment): PaymentS
     payment.cashVestingAmount
   )
   summary.cashVestingAmountSumUsd = usdcToUsd(summary.cashVestingAmountSum)
+
+  // payee address summary
+  let payeeAddressSummary = _findOrCreateAddressPaymentSummary(payment.payee.toHexString(), summary.id)
+
+  // update payee address summary
+  payeeAddressSummary.totalAmountSum = payeeAddressSummary.totalAmountSum.plus(payment.totalAmount)
+  payeeAddressSummary.totalAmountSumUsd = usdcToUsd(payeeAddressSummary.totalAmountSum)
+  payeeAddressSummary.payeeAmountSum = payeeAddressSummary.payeeAmountSum.plus(payment.payeeAmount)
+  payeeAddressSummary.payeeAmountSumUsd = usdcToUsd(payeeAddressSummary.payeeAmountSum)
+  payeeAddressSummary.cashVestingAmountSum = payeeAddressSummary.cashVestingAmountSum.plus(payment.cashVestingAmount)
+  payeeAddressSummary.cashVestingAmountSumUsd = usdcToUsd(payeeAddressSummary.cashVestingAmountSum)
+  payeeAddressSummary.takeHomeAmountSum = payeeAddressSummary.takeHomeAmountSum.plus(payment.payeeAmount)
+  payeeAddressSummary.takeHomeAmountSumUsd = usdcToUsd(payeeAddressSummary.takeHomeAmountSum)
+  payeeAddressSummary.save()
+
+  // update lead address summary
+  const leadAddress = context.contract.projects(payment.projectId).getLeadAddress()
+  const leadAddressSummary = _findOrCreateAddressPaymentSummary(leadAddress.toHexString(), summary.id)
+  leadAddressSummary.leadAmountSum = leadAddressSummary.leadAmountSum.plus(payment.leadAmount)
+  leadAddressSummary.leadAmountSumUsd = usdcToUsd(leadAddressSummary.leadAmountSum)
+  leadAddressSummary.takeHomeAmountSum = leadAddressSummary.takeHomeAmountSum.plus(payment.leadAmount)
+  leadAddressSummary.takeHomeAmountSumUsd = usdcToUsd(leadAddressSummary.takeHomeAmountSum)
+  leadAddressSummary.save()
+
+  // update sales address summary
+  const salesAddress = context.contract.projects(payment.projectId).getSalesAddress()
+  const salesAddressSummary = _findOrCreateAddressPaymentSummary(salesAddress.toHexString(), summary.id)
+  salesAddressSummary.salesAmountSum = salesAddressSummary.salesAmountSum.plus(payment.salesAmount)
+  salesAddressSummary.salesAmountSumUsd = usdcToUsd(salesAddressSummary.salesAmountSum)
+  salesAddressSummary.takeHomeAmountSum = salesAddressSummary.takeHomeAmountSum.plus(payment.salesAmount)
+  salesAddressSummary.takeHomeAmountSumUsd = usdcToUsd(salesAddressSummary.takeHomeAmountSum)
+  salesAddressSummary.save()
+
+  let addressPaymentSummaries = summary.addressPaymentSummaries
+  addressPaymentSummaries.push(payeeAddressSummary.id)
+  addressPaymentSummaries.push(leadAddressSummary.id)
+  addressPaymentSummaries.push(salesAddressSummary.id)
+  summary.addressPaymentSummaries = addressPaymentSummaries
 
   summary.save()
 
