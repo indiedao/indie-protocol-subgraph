@@ -149,6 +149,178 @@ export class PaymentSummary extends Entity {
   set cashVestingAmountSumUsd(value: string) {
     this.set("cashVestingAmountSumUsd", Value.fromString(value));
   }
+
+  get addressPaymentSummaries(): Array<string> {
+    let value = this.get("addressPaymentSummaries");
+    return value!.toStringArray();
+  }
+
+  set addressPaymentSummaries(value: Array<string>) {
+    this.set("addressPaymentSummaries", Value.fromStringArray(value));
+  }
+}
+
+export class AddressPaymentSummary extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(
+      id != null,
+      "Cannot save AddressPaymentSummary entity without an ID"
+    );
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        `Entities of type AddressPaymentSummary must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set("AddressPaymentSummary", id.toString(), this);
+    }
+  }
+
+  static load(id: string): AddressPaymentSummary | null {
+    return changetype<AddressPaymentSummary | null>(
+      store.get("AddressPaymentSummary", id)
+    );
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get address(): string {
+    let value = this.get("address");
+    return value!.toString();
+  }
+
+  set address(value: string) {
+    this.set("address", Value.fromString(value));
+  }
+
+  get totalAmountSum(): BigInt {
+    let value = this.get("totalAmountSum");
+    return value!.toBigInt();
+  }
+
+  set totalAmountSum(value: BigInt) {
+    this.set("totalAmountSum", Value.fromBigInt(value));
+  }
+
+  get totalAmountSumUsd(): string {
+    let value = this.get("totalAmountSumUsd");
+    return value!.toString();
+  }
+
+  set totalAmountSumUsd(value: string) {
+    this.set("totalAmountSumUsd", Value.fromString(value));
+  }
+
+  get payeeAmountSum(): BigInt {
+    let value = this.get("payeeAmountSum");
+    return value!.toBigInt();
+  }
+
+  set payeeAmountSum(value: BigInt) {
+    this.set("payeeAmountSum", Value.fromBigInt(value));
+  }
+
+  get payeeAmountSumUsd(): string {
+    let value = this.get("payeeAmountSumUsd");
+    return value!.toString();
+  }
+
+  set payeeAmountSumUsd(value: string) {
+    this.set("payeeAmountSumUsd", Value.fromString(value));
+  }
+
+  get leadAmountSum(): BigInt {
+    let value = this.get("leadAmountSum");
+    return value!.toBigInt();
+  }
+
+  set leadAmountSum(value: BigInt) {
+    this.set("leadAmountSum", Value.fromBigInt(value));
+  }
+
+  get leadAmountSumUsd(): string {
+    let value = this.get("leadAmountSumUsd");
+    return value!.toString();
+  }
+
+  set leadAmountSumUsd(value: string) {
+    this.set("leadAmountSumUsd", Value.fromString(value));
+  }
+
+  get salesAmountSum(): BigInt {
+    let value = this.get("salesAmountSum");
+    return value!.toBigInt();
+  }
+
+  set salesAmountSum(value: BigInt) {
+    this.set("salesAmountSum", Value.fromBigInt(value));
+  }
+
+  get salesAmountSumUsd(): string {
+    let value = this.get("salesAmountSumUsd");
+    return value!.toString();
+  }
+
+  set salesAmountSumUsd(value: string) {
+    this.set("salesAmountSumUsd", Value.fromString(value));
+  }
+
+  get cashVestingAmountSum(): BigInt {
+    let value = this.get("cashVestingAmountSum");
+    return value!.toBigInt();
+  }
+
+  set cashVestingAmountSum(value: BigInt) {
+    this.set("cashVestingAmountSum", Value.fromBigInt(value));
+  }
+
+  get cashVestingAmountSumUsd(): string {
+    let value = this.get("cashVestingAmountSumUsd");
+    return value!.toString();
+  }
+
+  set cashVestingAmountSumUsd(value: string) {
+    this.set("cashVestingAmountSumUsd", Value.fromString(value));
+  }
+
+  get takeHomeAmountSum(): BigInt {
+    let value = this.get("takeHomeAmountSum");
+    return value!.toBigInt();
+  }
+
+  set takeHomeAmountSum(value: BigInt) {
+    this.set("takeHomeAmountSum", Value.fromBigInt(value));
+  }
+
+  get takeHomeAmountSumUsd(): string {
+    let value = this.get("takeHomeAmountSumUsd");
+    return value!.toString();
+  }
+
+  set takeHomeAmountSumUsd(value: string) {
+    this.set("takeHomeAmountSumUsd", Value.fromString(value));
+  }
+
+  get paymentSummary(): string {
+    let value = this.get("paymentSummary");
+    return value!.toString();
+  }
+
+  set paymentSummary(value: string) {
+    this.set("paymentSummary", Value.fromString(value));
+  }
 }
 
 export class Quarter extends Entity {
