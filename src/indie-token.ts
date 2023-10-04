@@ -186,12 +186,12 @@ function _updateQuarterlyDividend(event: TransferEvent): void {
     "MEMBER_COUNT_STATS"
   )
 
-  if (currentIndieMemberCount.active.isZero()) {
+  if (currentIndieMemberCount.total.isZero()) {
     entity.averageDividendSum = BigInt.fromI32(0);
     entity.averageDividendUsd = usdcToUsd(BigInt.fromI32(0));
   } else {
-    entity.averageDividendSum = dividends.div(currentIndieMemberCount.active)
-    entity.averageDividendUsd = usdcToUsd(dividends.div(currentIndieMemberCount.active))
+    entity.averageDividendSum = dividends.div(currentIndieMemberCount.total)
+    entity.averageDividendUsd = usdcToUsd(dividends.div(currentIndieMemberCount.total))
   }
   entity.netProfitSum = dividends
   entity.netProfitUsd = usdcToUsd(dividends)
