@@ -54,6 +54,9 @@ type Quarter @entity {
   quarter: Int! # uint8
   year: Int! # uint16
   paymentSummary: PaymentSummary
+  indieMemberCount: IndieMemberCount
+  tokenSupply: BigInt!
+  dividendProfit:DividendProfit
 }
 
 type Week @entity {
@@ -223,3 +226,59 @@ type WithdrawFromProject @entity(immutable: true) {
 }
 
 # END: Auto-generated GraphQL schema
+
+type IndieMemberCount @entity {
+  id: ID!
+  total: BigInt!
+  active: BigInt!
+  inactive: BigInt!
+  claimed: BigInt!
+  terminated: BigInt!
+  resigned: BigInt!
+}
+
+type SeasonalDividend @entity(immutable: true) {
+  id: Bytes!
+  seasonId: BigInt! # uint256
+  totalDividend: BigInt! # uint256
+  totalWithholding: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type SeasonalMemberClaimedDividend @entity(immutable: true) {
+  id: Bytes!
+  seasonId: BigInt! # uint256
+  memberAddress: Bytes! # address
+  netDividend: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type SeasonalMemberDividend @entity(immutable: true) {
+  id: Bytes!
+  seasonId: BigInt! # uint256
+  memberAddress: Bytes! # address
+  netDividend: BigInt! # uint256
+  withholding: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TokenSupply @entity {
+  id: ID!
+  totalSupply: BigInt!
+}
+
+type DividendProfit @entity {
+  id: ID!
+  averageDividendSum: BigInt!
+  averageDividendUsd: String!
+  netProfitSum: BigInt!
+  netProfitUsd: String!
+  dividendPerIndieSum: BigInt!
+  dividendPerIndieUsd:String!
+}
