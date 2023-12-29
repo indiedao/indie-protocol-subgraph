@@ -1,6 +1,6 @@
-import { IndieToken } from '../generated/IndieToken/IndieToken'
 import {
   Claimed as ClaimedEvent,
+  IndieToken,
   MemberStatusActive as MemberStatusActiveEvent,
   MemberStatusInactive as MemberStatusInactiveEvent,
   MemberStatusResigned as MemberStatusResignedEvent,
@@ -19,94 +19,85 @@ import {
   DividendProfit,
 } from "../generated/schema";
 import { BigInt } from "@graphprotocol/graph-ts";
-import { _findOrCreateQuarterFromTimestamp, getSeasonIdByQuarterId } from "./quarter";
-import { usdcToUsd } from './currency';
-
-class InternalEntity {
-  id: string;
-  data: string;
-
-  constructor(id: string, data: string) {
-    this.id = id;
-    this.data = data;
-  }
-}
-
+import {
+  findOrCreateQuarterFromTimestamp,
+  findOrCreatePreviousQuarter,
+  getSeasonIdByQuarterId,
+} from "./quarter";
+import { usdcToDecimal, usdcToUsd } from "./currency";
 
 export function handleTransfer(event: TransferEvent): void {
   _updateTokenSupply(event);
+}
 
+export function _updateIndieMemberCount(timestamp: BigInt): void {
   _updateTotalMemberCount();
-
-  _updateQuarterlyIndieMemeberCount(event.block.timestamp);
-
-  _updateQuarterlyDividend(event)
-
+  _updateQuarterlyIndieMemberCount(timestamp);
 }
 
 export function handleClaimed(event: ClaimedEvent): void {
-  let entity = getOrCreateIndieMemberCount("MEMBER_COUNT_STATS");
+  let entity = _getOrCreateIndieMemberCount("MEMBER_COUNT_STATS");
 
   entity.claimed = entity.claimed.plus(BigInt.fromI32(1));
   entity.save();
 
-  _updateQuarterlyIndieMemeberCount(event.block.timestamp);
+  _updateQuarterlyIndieMemberCount(event.block.timestamp);
 }
 
 export function handleMemberStatusResigned(
   event: MemberStatusResignedEvent
 ): void {
-  let entity = getOrCreateIndieMemberCount("MEMBER_COUNT_STATS");
+  let entity = _getOrCreateIndieMemberCount("MEMBER_COUNT_STATS");
 
   entity.active = entity.active.minus(BigInt.fromI32(1));
   entity.resigned = entity.resigned.plus(BigInt.fromI32(1));
   entity.save();
 
-  _updateQuarterlyIndieMemeberCount(event.block.timestamp);
+  _updateQuarterlyIndieMemberCount(event.block.timestamp);
 }
 
 export function handleMemberStatusTerminated(
   event: MemberStatusTerminatedEvent
 ): void {
-  let entity = getOrCreateIndieMemberCount("MEMBER_COUNT_STATS");
+  let entity = _getOrCreateIndieMemberCount("MEMBER_COUNT_STATS");
 
   entity.active = entity.active.minus(BigInt.fromI32(1));
   entity.terminated = entity.terminated.plus(BigInt.fromI32(1));
   entity.save();
 
-  _updateQuarterlyIndieMemeberCount(event.block.timestamp);
+  _updateQuarterlyIndieMemberCount(event.block.timestamp);
 }
 
 //Assumes resigned + terminated members are active when removed
 export function handleMemberStatusActive(event: MemberStatusActiveEvent): void {
-  let entity = getOrCreateIndieMemberCount("MEMBER_COUNT_STATS");
+  let entity = _getOrCreateIndieMemberCount("MEMBER_COUNT_STATS");
 
   entity.active = entity.active.plus(BigInt.fromI32(1));
   entity.save();
 
-  _updateQuarterlyIndieMemeberCount(event.block.timestamp);
+  _updateQuarterlyIndieMemberCount(event.block.timestamp);
 }
 
 export function handleMemberStatusInactive(
   event: MemberStatusInactiveEvent
 ): void {
-  let entity = getOrCreateIndieMemberCount("MEMBER_COUNT_STATS");
+  let entity = _getOrCreateIndieMemberCount("MEMBER_COUNT_STATS");
 
   entity.active = entity.active.minus(BigInt.fromI32(1));
   entity.inactive = entity.total.minus(entity.active);
   entity.save();
 
-  _updateQuarterlyIndieMemeberCount(event.block.timestamp);
+  _updateQuarterlyIndieMemberCount(event.block.timestamp);
 }
 
 function _updateTotalMemberCount(): void {
-  let entity = getOrCreateIndieMemberCount("MEMBER_COUNT_STATS");
+  let entity = _getOrCreateIndieMemberCount("MEMBER_COUNT_STATS");
 
   entity.total = entity.claimed.minus(entity.terminated).minus(entity.resigned);
   entity.save();
 }
 
-function getOrCreateIndieMemberCount(entityId: string): IndieMemberCount {
+function _getOrCreateIndieMemberCount(entityId: string): IndieMemberCount {
   let entity = IndieMemberCount.load(entityId);
   if (entity == null) {
     entity = new IndieMemberCount(entityId);
@@ -137,15 +128,15 @@ function _updateTokenSupply(event: TransferEvent): void {
 
   tokenSupply.save();
 
-  let currentQuarter = _findOrCreateQuarterFromTimestamp(event.block.timestamp);
+  let currentQuarter = findOrCreateQuarterFromTimestamp(event.block.timestamp);
   currentQuarter.tokenSupply = tokenSupply.totalSupply;
   currentQuarter.save();
 }
 
-function _updateQuarterlyIndieMemeberCount(timestamp: BigInt): void {
-  let currentQuarter = _findOrCreateQuarterFromTimestamp(timestamp);
+function _updateQuarterlyIndieMemberCount(timestamp: BigInt): void {
+  let currentQuarter = findOrCreateQuarterFromTimestamp(timestamp);
 
-  let currentIndieMemberCount = getOrCreateIndieMemberCount(
+  let currentIndieMemberCount = _getOrCreateIndieMemberCount(
     "MEMBER_COUNT_STATS"
   );
 
@@ -165,52 +156,57 @@ function _updateQuarterlyIndieMemeberCount(timestamp: BigInt): void {
   currentQuarter.save();
 }
 
-function _updateQuarterlyDividend(event: TransferEvent): void {
-  let currentQuarter = _findOrCreateQuarterFromTimestamp(event.block.timestamp)
-  let currentSeason = getSeasonIdByQuarterId(currentQuarter.id)
+function _updateQuarterlyDividend(
+  event: SeasonalDividendEvent
+): void {
+  let currentQuarter = findOrCreateQuarterFromTimestamp(event.block.timestamp);
+  let currentSeason = getSeasonIdByQuarterId(currentQuarter.id);
+  let previousQuarter = findOrCreatePreviousQuarter(currentQuarter.id);
 
   if (currentSeason == BigInt.fromI32(0)) {
     return;
   }
 
   let contract = IndieToken.bind(event.address);
-  let dividends = contract.dividendsBySeason(currentSeason)
+  let dividends = contract.dividendsBySeason(currentSeason);
 
-
-  let entity = DividendProfit.load(currentQuarter.id)
+  let entity = DividendProfit.load(previousQuarter.id);
   if (entity == null) {
-    entity = new DividendProfit(currentQuarter.id)
+    entity = new DividendProfit(previousQuarter.id);
   }
 
-  let currentIndieMemberCount = getOrCreateIndieMemberCount(
+  let currentIndieMemberCount = _getOrCreateIndieMemberCount(
     "MEMBER_COUNT_STATS"
-  )
+  );
 
   if (currentIndieMemberCount.total.isZero()) {
     entity.averageDividendSum = BigInt.fromI32(0);
     entity.averageDividendUsd = usdcToUsd(BigInt.fromI32(0));
   } else {
-    entity.averageDividendSum = dividends.div(currentIndieMemberCount.total)
-    entity.averageDividendUsd = usdcToUsd(dividends.div(currentIndieMemberCount.total))
+    entity.averageDividendSum = dividends.div(currentIndieMemberCount.total);
+    entity.averageDividendUsd = usdcToUsd(
+      dividends.div(currentIndieMemberCount.total)
+    );
   }
-  entity.netProfitSum = dividends
-  entity.netProfitUsd = usdcToUsd(dividends)
+  entity.netProfitSum = dividends;
+  entity.netProfitUsd = usdcToUsd(dividends);
 
-
-  if (currentQuarter.tokenSupply.isZero())  {
-    entity.dividendPerIndieSum = BigInt.fromI32(0)
-    entity.dividendPerIndieUsd = usdcToUsd(BigInt.fromI32(0))
+  if (currentQuarter.tokenSupply.isZero()) {
+    entity.dividendPerIndieSum = BigInt.fromI32(0);
+    entity.dividendPerIndieUsd = usdcToDecimal(BigInt.fromI32(0),BigInt.fromI32(6));
   } else {
-    let tokenSupplyFormatted = currentQuarter.tokenSupply.div(BigInt.fromI32(10).pow(18));
+    let tokenSupplyFormatted = currentQuarter.tokenSupply.div(
+      BigInt.fromI32(10).pow(18)
+    );
 
     entity.dividendPerIndieSum = dividends.div(tokenSupplyFormatted);
-    entity.dividendPerIndieUsd = usdcToUsd(dividends.div(tokenSupplyFormatted))
+    entity.dividendPerIndieUsd = usdcToDecimal(dividends.div(tokenSupplyFormatted),BigInt.fromI32(6));
   }
 
   entity.save();
 
-  currentQuarter.dividendProfit = entity.id
-  currentQuarter.save();
+  previousQuarter.dividendProfit = entity.id;
+  previousQuarter.save();
 }
 
 export function handleSeasonalDividend(event: SeasonalDividendEvent): void {
@@ -226,6 +222,9 @@ export function handleSeasonalDividend(event: SeasonalDividendEvent): void {
   entity.transactionHash = event.transaction.hash;
 
   entity.save();
+
+  _updateIndieMemberCount(event.block.timestamp)
+  _updateQuarterlyDividend(event)
 }
 
 export function handleSeasonalMemberClaimedDividend(

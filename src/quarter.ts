@@ -1,7 +1,7 @@
 import { Quarter } from "../generated/schema";
 import { BigInt } from "@graphprotocol/graph-ts";
 
-export function _findOrCreateQuarter(year: i32, quarter: i32): Quarter {
+function _findOrCreateQuarter(year: i32, quarter: i32): Quarter {
   // log.info('_findOrCreateQuarter | year: {}; quarter: {}', [year.toString(), quarter.toString()])
   const quarterId = `${year}_${quarter}`;
   let entity = Quarter.load(quarterId);
@@ -14,7 +14,7 @@ export function _findOrCreateQuarter(year: i32, quarter: i32): Quarter {
   return entity;
 }
 
-export function _findOrCreateQuarterFromTimestamp(timestamp: BigInt): Quarter {
+export function findOrCreateQuarterFromTimestamp(timestamp: BigInt): Quarter {
   // log.info('_findOrCreateQuarterFromTimestamp | timestamp: {}', [timestamp.toString()])
   const timestampAsNumber = timestamp.toI64();
   const timestampInMilliseconds = timestampAsNumber * 1000;
@@ -26,7 +26,7 @@ export function _findOrCreateQuarterFromTimestamp(timestamp: BigInt): Quarter {
   return _findOrCreateQuarter(year, quarter);
 }
 
-export function _getQuarterFromMonth(month: i32): i32 {
+function _getQuarterFromMonth(month: i32): i32 {
   // log.info('_getQuarterFromMonth | month: {}', [month.toString()])
   if (month <= 2) {
     return 1;
@@ -53,4 +53,19 @@ export function getSeasonIdByQuarterId(quarterId: string): BigInt {
   let season: i32 = (i32(year) - baseYear) * 4 + i32(quarter) - baseQuarter;
 
   return BigInt.fromI32(season)
+}
+
+export function findOrCreatePreviousQuarter(currentQuarterId: string): Quarter {
+  let parts = currentQuarterId.split("_");
+  let year = parseInt(parts[0]);
+  let quarter = parseInt(parts[1]);
+
+  if (quarter === 1) {
+    year -= 1;
+    quarter = 4;
+  } else {
+    quarter -= 1;
+  }
+
+  return _findOrCreateQuarter(i32(year), i32(quarter));
 }

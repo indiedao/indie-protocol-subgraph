@@ -43,7 +43,8 @@ import {
 import { firstDayOfWeek, formatDate, getWeekOfYear, lastDayOfWeek } from './dates'
 import { usdcToUsd } from './currency'
 import { IndieBrokerV1Context } from './IndieBrokerV1Context'
-import { _findOrCreateQuarterFromTimestamp } from './quarter'
+import { findOrCreateQuarterFromTimestamp } from './quarter'
+import { _updateIndieMemberCount } from './indie-token'
 
 export function handleCompleteProjectSprint(
   event: CompleteProjectSprintEvent
@@ -85,7 +86,7 @@ export function handleDistributePayment(event: DistributePaymentEvent): void {
   _updatePaymentSummary(context, "allTime", entity)
 
   // Update quarter summary
-  const quarter = _findOrCreateQuarterFromTimestamp(event.block.timestamp)
+  const quarter = findOrCreateQuarterFromTimestamp(event.block.timestamp)
   const quarterPaymentSummary = _updatePaymentSummary(context, quarter.id, entity)
   quarter.paymentSummary = quarterPaymentSummary.id
   quarter.save()
@@ -97,6 +98,10 @@ export function handleDistributePayment(event: DistributePaymentEvent): void {
   week.save()
 
   entity.save()
+
+  if (event.block.number > BigInt.fromI32(17170625) ) {
+    _updateIndieMemberCount(event.block.timestamp);
+  }
 }
 
 export function handleOwnershipTransferred(
