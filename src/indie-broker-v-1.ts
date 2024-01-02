@@ -43,6 +43,8 @@ import {
 import { firstDayOfWeek, formatDate, getWeekOfYear, lastDayOfWeek } from './dates'
 import { usdcToUsd } from './currency'
 import { IndieBrokerV1Context } from './IndieBrokerV1Context'
+import { findOrCreateQuarterFromTimestamp } from './quarter'
+import { _updateIndieMemberCount } from './indie-token'
 
 export function handleCompleteProjectSprint(
   event: CompleteProjectSprintEvent
@@ -84,7 +86,7 @@ export function handleDistributePayment(event: DistributePaymentEvent): void {
   _updatePaymentSummary(context, "allTime", entity)
 
   // Update quarter summary
-  const quarter = _findOrCreateQuarterFromTimestamp(event.block.timestamp)
+  const quarter = findOrCreateQuarterFromTimestamp(event.block.timestamp)
   const quarterPaymentSummary = _updatePaymentSummary(context, quarter.id, entity)
   quarter.paymentSummary = quarterPaymentSummary.id
   quarter.save()
@@ -96,6 +98,10 @@ export function handleDistributePayment(event: DistributePaymentEvent): void {
   week.save()
 
   entity.save()
+
+  if (event.block.number > BigInt.fromI32(17170625) ) {
+    _updateIndieMemberCount(event.block.timestamp);
+  }
 }
 
 export function handleOwnershipTransferred(
@@ -354,43 +360,6 @@ function _findOrCreateAddressPaymentSummary(address: string, paymentSummaryId: s
     entity.takeHomeAmountSumUsd = "0.00"
   }
   return entity
-}
-
-function _findOrCreateQuarter(year: i32, quarter: i32): Quarter {
-  // log.info('_findOrCreateQuarter | year: {}; quarter: {}', [year.toString(), quarter.toString()])
-  const quarterId = `${year}_${quarter}`
-  let entity = Quarter.load(quarterId)
-  if (entity == null) {
-    entity = new Quarter(quarterId)
-    entity.quarter = quarter
-    entity.year = year
-  }
-  return entity
-}
-
-function _findOrCreateQuarterFromTimestamp(timestamp: BigInt): Quarter {
-  // log.info('_findOrCreateQuarterFromTimestamp | timestamp: {}', [timestamp.toString()])
-  const timestampAsNumber = timestamp.toI64()
-  const timestampInMilliseconds = timestampAsNumber * 1000
-  const timestampAsDate = new Date(timestampInMilliseconds)
-  const year = timestampAsDate.getUTCFullYear()
-  const month = timestampAsDate.getUTCMonth()
-  const quarter = _getQuarterFromMonth(month)
-
-  return _findOrCreateQuarter(year, quarter)
-}
-
-function _getQuarterFromMonth (month: i32): i32 {
-  // log.info('_getQuarterFromMonth | month: {}', [month.toString()])
-  if (month <= 2) {
-    return 1
-  } else if (month <= 5) {
-    return 2
-  } else if (month <= 8) {
-    return 3
-  } else {
-    return 4
-  }
 }
 
 function _findOrCreateWeekFromTimestamp(timestamp: BigInt, quarter: Quarter): Week {

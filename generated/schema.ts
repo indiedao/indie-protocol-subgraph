@@ -388,6 +388,49 @@ export class Quarter extends Entity {
       this.set("paymentSummary", Value.fromString(<string>value));
     }
   }
+
+  get indieMemberCount(): string | null {
+    let value = this.get("indieMemberCount");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  set indieMemberCount(value: string | null) {
+    if (!value) {
+      this.unset("indieMemberCount");
+    } else {
+      this.set("indieMemberCount", Value.fromString(<string>value));
+    }
+  }
+
+  get tokenSupply(): BigInt {
+    let value = this.get("tokenSupply");
+    return value!.toBigInt();
+  }
+
+  set tokenSupply(value: BigInt) {
+    this.set("tokenSupply", Value.fromBigInt(value));
+  }
+
+  get dividendProfit(): string | null {
+    let value = this.get("dividendProfit");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  set dividendProfit(value: string | null) {
+    if (!value) {
+      this.unset("dividendProfit");
+    } else {
+      this.set("dividendProfit", Value.fromString(<string>value));
+    }
+  }
 }
 
 export class Week extends Entity {
@@ -1836,5 +1879,503 @@ export class WithdrawFromProject extends Entity {
 
   set transactionHash(value: Bytes) {
     this.set("transactionHash", Value.fromBytes(value));
+  }
+}
+
+export class IndieMemberCount extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save IndieMemberCount entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        `Entities of type IndieMemberCount must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set("IndieMemberCount", id.toString(), this);
+    }
+  }
+
+  static load(id: string): IndieMemberCount | null {
+    return changetype<IndieMemberCount | null>(
+      store.get("IndieMemberCount", id)
+    );
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get total(): BigInt {
+    let value = this.get("total");
+    return value!.toBigInt();
+  }
+
+  set total(value: BigInt) {
+    this.set("total", Value.fromBigInt(value));
+  }
+
+  get active(): BigInt {
+    let value = this.get("active");
+    return value!.toBigInt();
+  }
+
+  set active(value: BigInt) {
+    this.set("active", Value.fromBigInt(value));
+  }
+
+  get inactive(): BigInt {
+    let value = this.get("inactive");
+    return value!.toBigInt();
+  }
+
+  set inactive(value: BigInt) {
+    this.set("inactive", Value.fromBigInt(value));
+  }
+
+  get claimed(): BigInt {
+    let value = this.get("claimed");
+    return value!.toBigInt();
+  }
+
+  set claimed(value: BigInt) {
+    this.set("claimed", Value.fromBigInt(value));
+  }
+
+  get terminated(): BigInt {
+    let value = this.get("terminated");
+    return value!.toBigInt();
+  }
+
+  set terminated(value: BigInt) {
+    this.set("terminated", Value.fromBigInt(value));
+  }
+
+  get resigned(): BigInt {
+    let value = this.get("resigned");
+    return value!.toBigInt();
+  }
+
+  set resigned(value: BigInt) {
+    this.set("resigned", Value.fromBigInt(value));
+  }
+}
+
+export class SeasonalDividend extends Entity {
+  constructor(id: Bytes) {
+    super();
+    this.set("id", Value.fromBytes(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save SeasonalDividend entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.BYTES,
+        `Entities of type SeasonalDividend must have an ID of type Bytes but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set("SeasonalDividend", id.toBytes().toHexString(), this);
+    }
+  }
+
+  static load(id: Bytes): SeasonalDividend | null {
+    return changetype<SeasonalDividend | null>(
+      store.get("SeasonalDividend", id.toHexString())
+    );
+  }
+
+  get id(): Bytes {
+    let value = this.get("id");
+    return value!.toBytes();
+  }
+
+  set id(value: Bytes) {
+    this.set("id", Value.fromBytes(value));
+  }
+
+  get seasonId(): BigInt {
+    let value = this.get("seasonId");
+    return value!.toBigInt();
+  }
+
+  set seasonId(value: BigInt) {
+    this.set("seasonId", Value.fromBigInt(value));
+  }
+
+  get totalDividend(): BigInt {
+    let value = this.get("totalDividend");
+    return value!.toBigInt();
+  }
+
+  set totalDividend(value: BigInt) {
+    this.set("totalDividend", Value.fromBigInt(value));
+  }
+
+  get totalWithholding(): BigInt {
+    let value = this.get("totalWithholding");
+    return value!.toBigInt();
+  }
+
+  set totalWithholding(value: BigInt) {
+    this.set("totalWithholding", Value.fromBigInt(value));
+  }
+
+  get blockNumber(): BigInt {
+    let value = this.get("blockNumber");
+    return value!.toBigInt();
+  }
+
+  set blockNumber(value: BigInt) {
+    this.set("blockNumber", Value.fromBigInt(value));
+  }
+
+  get blockTimestamp(): BigInt {
+    let value = this.get("blockTimestamp");
+    return value!.toBigInt();
+  }
+
+  set blockTimestamp(value: BigInt) {
+    this.set("blockTimestamp", Value.fromBigInt(value));
+  }
+
+  get transactionHash(): Bytes {
+    let value = this.get("transactionHash");
+    return value!.toBytes();
+  }
+
+  set transactionHash(value: Bytes) {
+    this.set("transactionHash", Value.fromBytes(value));
+  }
+}
+
+export class SeasonalMemberClaimedDividend extends Entity {
+  constructor(id: Bytes) {
+    super();
+    this.set("id", Value.fromBytes(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(
+      id != null,
+      "Cannot save SeasonalMemberClaimedDividend entity without an ID"
+    );
+    if (id) {
+      assert(
+        id.kind == ValueKind.BYTES,
+        `Entities of type SeasonalMemberClaimedDividend must have an ID of type Bytes but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set(
+        "SeasonalMemberClaimedDividend",
+        id.toBytes().toHexString(),
+        this
+      );
+    }
+  }
+
+  static load(id: Bytes): SeasonalMemberClaimedDividend | null {
+    return changetype<SeasonalMemberClaimedDividend | null>(
+      store.get("SeasonalMemberClaimedDividend", id.toHexString())
+    );
+  }
+
+  get id(): Bytes {
+    let value = this.get("id");
+    return value!.toBytes();
+  }
+
+  set id(value: Bytes) {
+    this.set("id", Value.fromBytes(value));
+  }
+
+  get seasonId(): BigInt {
+    let value = this.get("seasonId");
+    return value!.toBigInt();
+  }
+
+  set seasonId(value: BigInt) {
+    this.set("seasonId", Value.fromBigInt(value));
+  }
+
+  get memberAddress(): Bytes {
+    let value = this.get("memberAddress");
+    return value!.toBytes();
+  }
+
+  set memberAddress(value: Bytes) {
+    this.set("memberAddress", Value.fromBytes(value));
+  }
+
+  get netDividend(): BigInt {
+    let value = this.get("netDividend");
+    return value!.toBigInt();
+  }
+
+  set netDividend(value: BigInt) {
+    this.set("netDividend", Value.fromBigInt(value));
+  }
+
+  get blockNumber(): BigInt {
+    let value = this.get("blockNumber");
+    return value!.toBigInt();
+  }
+
+  set blockNumber(value: BigInt) {
+    this.set("blockNumber", Value.fromBigInt(value));
+  }
+
+  get blockTimestamp(): BigInt {
+    let value = this.get("blockTimestamp");
+    return value!.toBigInt();
+  }
+
+  set blockTimestamp(value: BigInt) {
+    this.set("blockTimestamp", Value.fromBigInt(value));
+  }
+
+  get transactionHash(): Bytes {
+    let value = this.get("transactionHash");
+    return value!.toBytes();
+  }
+
+  set transactionHash(value: Bytes) {
+    this.set("transactionHash", Value.fromBytes(value));
+  }
+}
+
+export class SeasonalMemberDividend extends Entity {
+  constructor(id: Bytes) {
+    super();
+    this.set("id", Value.fromBytes(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(
+      id != null,
+      "Cannot save SeasonalMemberDividend entity without an ID"
+    );
+    if (id) {
+      assert(
+        id.kind == ValueKind.BYTES,
+        `Entities of type SeasonalMemberDividend must have an ID of type Bytes but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set("SeasonalMemberDividend", id.toBytes().toHexString(), this);
+    }
+  }
+
+  static load(id: Bytes): SeasonalMemberDividend | null {
+    return changetype<SeasonalMemberDividend | null>(
+      store.get("SeasonalMemberDividend", id.toHexString())
+    );
+  }
+
+  get id(): Bytes {
+    let value = this.get("id");
+    return value!.toBytes();
+  }
+
+  set id(value: Bytes) {
+    this.set("id", Value.fromBytes(value));
+  }
+
+  get seasonId(): BigInt {
+    let value = this.get("seasonId");
+    return value!.toBigInt();
+  }
+
+  set seasonId(value: BigInt) {
+    this.set("seasonId", Value.fromBigInt(value));
+  }
+
+  get memberAddress(): Bytes {
+    let value = this.get("memberAddress");
+    return value!.toBytes();
+  }
+
+  set memberAddress(value: Bytes) {
+    this.set("memberAddress", Value.fromBytes(value));
+  }
+
+  get netDividend(): BigInt {
+    let value = this.get("netDividend");
+    return value!.toBigInt();
+  }
+
+  set netDividend(value: BigInt) {
+    this.set("netDividend", Value.fromBigInt(value));
+  }
+
+  get withholding(): BigInt {
+    let value = this.get("withholding");
+    return value!.toBigInt();
+  }
+
+  set withholding(value: BigInt) {
+    this.set("withholding", Value.fromBigInt(value));
+  }
+
+  get blockNumber(): BigInt {
+    let value = this.get("blockNumber");
+    return value!.toBigInt();
+  }
+
+  set blockNumber(value: BigInt) {
+    this.set("blockNumber", Value.fromBigInt(value));
+  }
+
+  get blockTimestamp(): BigInt {
+    let value = this.get("blockTimestamp");
+    return value!.toBigInt();
+  }
+
+  set blockTimestamp(value: BigInt) {
+    this.set("blockTimestamp", Value.fromBigInt(value));
+  }
+
+  get transactionHash(): Bytes {
+    let value = this.get("transactionHash");
+    return value!.toBytes();
+  }
+
+  set transactionHash(value: Bytes) {
+    this.set("transactionHash", Value.fromBytes(value));
+  }
+}
+
+export class TokenSupply extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save TokenSupply entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        `Entities of type TokenSupply must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set("TokenSupply", id.toString(), this);
+    }
+  }
+
+  static load(id: string): TokenSupply | null {
+    return changetype<TokenSupply | null>(store.get("TokenSupply", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get totalSupply(): BigInt {
+    let value = this.get("totalSupply");
+    return value!.toBigInt();
+  }
+
+  set totalSupply(value: BigInt) {
+    this.set("totalSupply", Value.fromBigInt(value));
+  }
+}
+
+export class DividendProfit extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save DividendProfit entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        `Entities of type DividendProfit must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set("DividendProfit", id.toString(), this);
+    }
+  }
+
+  static load(id: string): DividendProfit | null {
+    return changetype<DividendProfit | null>(store.get("DividendProfit", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get averageDividendSum(): BigInt {
+    let value = this.get("averageDividendSum");
+    return value!.toBigInt();
+  }
+
+  set averageDividendSum(value: BigInt) {
+    this.set("averageDividendSum", Value.fromBigInt(value));
+  }
+
+  get averageDividendUsd(): string {
+    let value = this.get("averageDividendUsd");
+    return value!.toString();
+  }
+
+  set averageDividendUsd(value: string) {
+    this.set("averageDividendUsd", Value.fromString(value));
+  }
+
+  get netProfitSum(): BigInt {
+    let value = this.get("netProfitSum");
+    return value!.toBigInt();
+  }
+
+  set netProfitSum(value: BigInt) {
+    this.set("netProfitSum", Value.fromBigInt(value));
+  }
+
+  get netProfitUsd(): string {
+    let value = this.get("netProfitUsd");
+    return value!.toString();
+  }
+
+  set netProfitUsd(value: string) {
+    this.set("netProfitUsd", Value.fromString(value));
+  }
+
+  get dividendPerIndieSum(): BigInt {
+    let value = this.get("dividendPerIndieSum");
+    return value!.toBigInt();
+  }
+
+  set dividendPerIndieSum(value: BigInt) {
+    this.set("dividendPerIndieSum", Value.fromBigInt(value));
+  }
+
+  get dividendPerIndieUsd(): string {
+    let value = this.get("dividendPerIndieUsd");
+    return value!.toString();
+  }
+
+  set dividendPerIndieUsd(value: string) {
+    this.set("dividendPerIndieUsd", Value.fromString(value));
   }
 }

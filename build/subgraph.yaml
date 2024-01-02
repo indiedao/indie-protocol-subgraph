@@ -68,3 +68,45 @@ dataSources:
         - event: WithdrawFromProject(indexed uint256,uint256,indexed address)
           handler: handleWithdrawFromProject
       file: IndieBrokerV1/IndieBrokerV1.wasm
+  - kind: ethereum
+    name: IndieToken
+    network: mainnet
+    source:
+      address: "0x17f67fcc672b9E3bBb0d9d6A5608a250a45cBF60"
+      abi: IndieToken
+      startBlock: 17170625
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ETHWithdrawn
+        - SeasonalDividend
+        - SeasonalMemberClaimedDividend
+        - SeasonalMemberDividend
+        - USDCWithdrawn
+        - TokenSupply
+        - DividendProfitMetric
+      abis:
+        - name: IndieToken
+          file: IndieToken/abis/IndieToken.json
+      eventHandlers:
+        - event: Claimed(indexed address,uint256)
+          handler: handleClaimed
+        - event: MemberStatusActive(indexed address)
+          handler: handleMemberStatusActive
+        - event: MemberStatusInactive(indexed address)
+          handler: handleMemberStatusInactive
+        - event: MemberStatusResigned(indexed address)
+          handler: handleMemberStatusResigned
+        - event: MemberStatusTerminated(indexed address)
+          handler: handleMemberStatusTerminated
+        - event: SeasonalDividend(indexed uint256,uint256,uint256)
+          handler: handleSeasonalDividend
+        - event: SeasonalMemberClaimedDividend(indexed uint256,indexed address,uint256)
+          handler: handleSeasonalMemberClaimedDividend
+        - event: SeasonalMemberDividend(indexed uint256,indexed address,uint256,uint256)
+          handler: handleSeasonalMemberDividend
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+      file: IndieToken/IndieToken.wasm
