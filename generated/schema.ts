@@ -431,6 +431,33 @@ export class Quarter extends Entity {
       this.set("dividendProfit", Value.fromString(<string>value));
     }
   }
+
+  get seasonalDividends(): Array<Bytes> {
+    let value = this.get("seasonalDividends");
+    return value!.toBytesArray();
+  }
+
+  set seasonalDividends(value: Array<Bytes>) {
+    this.set("seasonalDividends", Value.fromBytesArray(value));
+  }
+
+  get seasonalMemberDividends(): Array<Bytes> {
+    let value = this.get("seasonalMemberDividends");
+    return value!.toBytesArray();
+  }
+
+  set seasonalMemberDividends(value: Array<Bytes>) {
+    this.set("seasonalMemberDividends", Value.fromBytesArray(value));
+  }
+
+  get seasonalMemberClaimedDividends(): Array<Bytes> {
+    let value = this.get("seasonalMemberClaimedDividends");
+    return value!.toBytesArray();
+  }
+
+  set seasonalMemberClaimedDividends(value: Array<Bytes>) {
+    this.set("seasonalMemberClaimedDividends", Value.fromBytesArray(value));
+  }
 }
 
 export class Week extends Entity {
