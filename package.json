@@ -5,6 +5,7 @@
     "codegen": "graph codegen",
     "build": "graph build",
     "deploy": "graph deploy --product hosted-service indiedao/indie-protocol-subgraph",
+    "deploy-test": "graph deploy --product hosted-service seanconnollydev/indie-protocol-subgraph-test",
     "create-local": "graph create --node http://localhost:8020/ indiedao/indie-protocol-subgraph",
     "remove-local": "graph remove --node http://localhost:8020/ indiedao/indie-protocol-subgraph",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 indiedao/indie-protocol-subgraph",
