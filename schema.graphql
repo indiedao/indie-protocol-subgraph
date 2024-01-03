@@ -56,7 +56,10 @@ type Quarter @entity {
   paymentSummary: PaymentSummary
   indieMemberCount: IndieMemberCount
   tokenSupply: BigInt!
-  dividendProfit:DividendProfit
+  dividendProfit: DividendProfit
+  seasonalDividends: [SeasonalDividend!]!
+  seasonalMemberDividends: [SeasonalMemberDividend!]!
+  seasonalMemberClaimedDividends: [SeasonalMemberClaimedDividend!]!
 }
 
 type Week @entity {
@@ -280,5 +283,5 @@ type DividendProfit @entity {
   netProfitSum: BigInt!
   netProfitUsd: String!
   dividendPerIndieSum: BigInt!
-  dividendPerIndieUsd:String!
+  dividendPerIndieUsd: String!
 }

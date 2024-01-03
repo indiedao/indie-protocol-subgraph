@@ -23,6 +23,7 @@ import {
   findOrCreateQuarterFromTimestamp,
   findOrCreatePreviousQuarter,
   getSeasonIdByQuarterId,
+  findOrCreateQuarterFromSeasonId,
 } from "./quarter";
 import { usdcToDecimal, usdcToUsd } from "./currency";
 
@@ -209,6 +210,30 @@ function _updateQuarterlyDividend(
   previousQuarter.save();
 }
 
+function _addSeasonalDividendToQuarter(entity: SeasonalDividend): void {
+  const quarter = findOrCreateQuarterFromSeasonId(entity.seasonId);
+  const seasonalDividends = quarter.seasonalDividends;
+  seasonalDividends.push(entity.id);
+  quarter.seasonalDividends = seasonalDividends;
+  quarter.save();
+}
+
+function _addSeasonalMemberClaimedDividendToQuarter(entity: SeasonalMemberClaimedDividend): void {
+  const quarter = findOrCreateQuarterFromSeasonId(entity.seasonId);
+  const seasonalMemberClaimedDividends = quarter.seasonalMemberClaimedDividends;
+  seasonalMemberClaimedDividends.push(entity.id);
+  quarter.seasonalMemberClaimedDividends = seasonalMemberClaimedDividends;
+  quarter.save();
+}
+
+function _addSeasonalMemberDividendToQuarter(entity: SeasonalMemberDividend): void {
+  const quarter = findOrCreateQuarterFromSeasonId(entity.seasonId);
+  const seasonalMemberDividends = quarter.seasonalMemberDividends;
+  seasonalMemberDividends.push(entity.id);
+  quarter.seasonalMemberDividends = seasonalMemberDividends;
+  quarter.save();
+}
+
 export function handleSeasonalDividend(event: SeasonalDividendEvent): void {
   let entity = new SeasonalDividend(
     event.transaction.hash.concatI32(event.logIndex.toI32())
@@ -225,6 +250,7 @@ export function handleSeasonalDividend(event: SeasonalDividendEvent): void {
 
   _updateIndieMemberCount(event.block.timestamp)
   _updateQuarterlyDividend(event)
+  _addSeasonalDividendToQuarter(entity);
 }
 
 export function handleSeasonalMemberClaimedDividend(
@@ -242,6 +268,8 @@ export function handleSeasonalMemberClaimedDividend(
   entity.transactionHash = event.transaction.hash;
 
   entity.save();
+
+  _addSeasonalMemberClaimedDividendToQuarter(entity);
 }
 
 export function handleSeasonalMemberDividend(
@@ -260,4 +288,6 @@ export function handleSeasonalMemberDividend(
   entity.transactionHash = event.transaction.hash;
 
   entity.save();
+
+  _addSeasonalMemberDividendToQuarter(entity);
 }

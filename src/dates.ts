@@ -33,7 +33,7 @@ export function lastDayOfWeek(date: Date): Date {
 
 export function getWeekOfYear(date: Date): i32 {
     const onejan = new Date(Date.UTC(date.getUTCFullYear(), 0, 1, 0, 0, 0, 0));
-    log.info('getWeekOfYear | onejan: {}', [onejan.toISOString()])
+    // log.info('getWeekOfYear | onejan: {}', [onejan.toISOString()])
     return i32(Math.ceil(i32(((date.getTime() - onejan.getTime()) / 86400000) + onejan.getUTCDay() + 1) / 7));
 }
 

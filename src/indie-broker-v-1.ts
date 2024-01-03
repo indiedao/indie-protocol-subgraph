@@ -363,7 +363,7 @@ function _findOrCreateAddressPaymentSummary(address: string, paymentSummaryId: s
 }
 
 function _findOrCreateWeekFromTimestamp(timestamp: BigInt, quarter: Quarter): Week {
-  log.info('_findOrCreateWeekFromTimestamp | timestamp: {}', [timestamp.toString()])
+  // log.info('_findOrCreateWeekFromTimestamp | timestamp: {}', [timestamp.toString()])
   const timestampAsNumber = timestamp.toI64()
   const timestampInMilliseconds = timestampAsNumber * 1000
   const timestampAsDate = new Date(timestampInMilliseconds)
@@ -387,7 +387,7 @@ function _findOrCreateWeekFromTimestamp(timestamp: BigInt, quarter: Quarter): We
 }
 
 function _updatePaymentSummary(context: IndieBrokerV1Context, id: string, payment: DistributePayment): PaymentSummary {
-  log.info('_updatePaymentSummary | id: {}', [id.toString()])
+  // log.info('_updatePaymentSummary | id: {}', [id.toString()])
 
   const summary = _findOrCreatePaymentSummary(id)
   summary.totalAmountSum = summary.totalAmountSum.plus(
